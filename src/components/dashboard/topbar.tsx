@@ -13,11 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DateRangePicker } from "@/components/dashboard/date-range-picker";
+import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
 import type { DateRange } from "@/types/analytics";
 
 interface TopbarProps {
   userName: string;
   avatarUrl: string | null;
+  userEmail: string;
   dateRange?: DateRange;
   onDateRangeChange?: (range: DateRange) => void;
 }
@@ -35,6 +37,7 @@ function getInitials(name: string): string {
 export function Topbar({
   userName,
   avatarUrl,
+  userEmail,
   dateRange,
   onDateRangeChange,
 }: TopbarProps) {
@@ -50,6 +53,11 @@ export function Topbar({
   return (
     <header className="flex h-14 items-center justify-between border-b px-6">
       <div className="flex items-center gap-4">
+        <MobileSidebar
+          userName={userName}
+          avatarUrl={avatarUrl}
+          userEmail={userEmail}
+        />
         {onDateRangeChange && (
           <DateRangePicker
             value={dateRange}

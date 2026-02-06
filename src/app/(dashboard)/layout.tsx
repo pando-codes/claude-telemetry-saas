@@ -30,7 +30,7 @@ export default async function DashboardLayout({
         avatarUrl={avatarUrl}
         userEmail={user.email ?? ""}
       />
-      <main className="flex-1 ml-64 min-h-screen bg-background">
+      <main className="flex-1 md:ml-64 min-h-screen bg-background">
         {children}
       </main>
     </div>

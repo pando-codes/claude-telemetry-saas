@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 
-interface SidebarProps {
+export interface SidebarProps {
   userName: string;
   avatarUrl: string | null;
   userEmail: string;
@@ -42,7 +42,12 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export function Sidebar({ userName, avatarUrl, userEmail }: SidebarProps) {
+export function SidebarContent({
+  userName,
+  avatarUrl,
+  userEmail,
+  onNavigate,
+}: SidebarProps & { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   function isActive(href: string): boolean {
@@ -51,9 +56,9 @@ export function Sidebar({ userName, avatarUrl, userEmail }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
+    <>
       <div className="flex h-14 items-center px-6">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" onClick={onNavigate}>
           <Terminal className="size-5 text-sidebar-primary" />
           <span className="text-lg font-semibold tracking-tight">
             Claude Telemetry
@@ -71,6 +76,7 @@ export function Sidebar({ userName, avatarUrl, userEmail }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
@@ -93,6 +99,7 @@ export function Sidebar({ userName, avatarUrl, userEmail }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
@@ -121,6 +128,14 @@ export function Sidebar({ userName, avatarUrl, userEmail }: SidebarProps) {
           </span>
         </div>
       </div>
+    </>
+  );
+}
+
+export function Sidebar(props: SidebarProps) {
+  return (
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground md:flex">
+      <SidebarContent {...props} />
     </aside>
   );
 }
