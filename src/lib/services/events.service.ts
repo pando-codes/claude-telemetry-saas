@@ -24,7 +24,7 @@ export async function ingestEvents(
     timestamp: e.ts,
     seq: e.seq,
     tool_name: (e.data?.tool_name as string) ?? null,
-    duration_ms: (e.data?.duration_ms as number) ?? null,
+    duration_ms: e.data?.duration_ms != null ? Math.round(e.data.duration_ms as number) : null,
     data: e.data,
   }));
 

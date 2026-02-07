@@ -44,7 +44,7 @@ export const POST = createApiHandler<IngestPayload>(
     const result = await ingestEvents(adminClient, userId, body.events);
 
     if (!result.success) {
-      return badRequest(result.error.message);
+      return badRequest(result.error.details ? `${result.error.message}: ${result.error.details}` : result.error.message);
     }
 
     return successResponse(result.data, { status: 201 });

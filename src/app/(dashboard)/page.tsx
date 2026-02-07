@@ -16,15 +16,23 @@ export default async function OverviewPage() {
     redirect("/login");
   }
 
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const p_from = thirtyDaysAgo.toISOString().substring(0, 10);
+  const p_to = now.toISOString().substring(0, 10);
+
   const [statsResult, dailyResult, toolsResult] = await Promise.all([
-    supabase.rpc("get_overview_stats", { p_user_id: user.id }),
+    supabase.rpc("get_overview_stats", { p_user_id: user.id, p_from, p_to }),
     supabase
-      .from("daily_activity")
+      .from("daily_aggregates")
       .select("date, sessions, events, tool_uses")
       .eq("user_id", user.id)
+      .gte("date", p_from)
+      .lte("date", p_to)
       .order("date", { ascending: true })
       .limit(30),
-    supabase.rpc("get_top_tools", { p_user_id: user.id, p_limit: 10 }),
+    supabase.rpc("get_top_tools", { p_user_id: user.id, p_from, p_to, p_limit: 10 }),
   ]);
 
   const stats: OverviewStats = statsResult.data ?? {
