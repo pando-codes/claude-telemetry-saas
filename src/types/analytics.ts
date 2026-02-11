@@ -2,6 +2,7 @@ export interface OverviewStats {
   total_sessions: number;
   total_events: number;
   total_tool_uses: number;
+  total_agent_calls: number;
   active_days: number;
   avg_session_duration_min: number;
   avg_tools_per_session: number;

@@ -15,21 +15,66 @@ export default async function ActivityPage() {
     redirect("/login");
   }
 
-  const [heatmapResult, dailyResult, stopReasonsResult] = await Promise.all([
-    supabase.rpc("get_hourly_heatmap", { p_user_id: user.id }),
+  const now = new Date();
+  const ninetyDaysAgo = new Date(now);
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const p_from = ninetyDaysAgo.toISOString().substring(0, 10);
+  const p_to = now.toISOString().substring(0, 10);
+
+  const [aggregatesResult] = await Promise.all([
     supabase
-      .from("daily_activity")
-      .select("date, sessions, events, tool_uses")
+      .from("daily_aggregates")
+      .select("date, sessions, events, tool_uses, hourly_distribution, stop_reasons")
       .eq("user_id", user.id)
-      .order("date", { ascending: true })
-      .limit(90),
-    supabase.rpc("get_stop_reasons", { p_user_id: user.id }),
+      .gte("date", p_from)
+      .lte("date", p_to)
+      .order("date", { ascending: true }),
   ]);
 
-  const heatmapData: HourlyHeatmapEntry[] = heatmapResult.data ?? [];
-  const dailyActivity: DailyActivity[] = dailyResult.data ?? [];
-  const stopReasons: { reason: string; count: number }[] =
-    stopReasonsResult.data ?? [];
+  const rows = aggregatesResult.data ?? [];
+
+  // Build daily activity
+  const dailyActivity: DailyActivity[] = rows.map((row) => ({
+    date: row.date,
+    sessions: row.sessions,
+    events: row.events,
+    tool_uses: row.tool_uses,
+  }));
+
+  // Build heatmap from hourly_distribution (7x24 grid by day-of-week)
+  const buckets = new Map<string, number>();
+  for (const row of rows) {
+    const dayOfWeek = new Date(row.date).getDay();
+    const hourly = row.hourly_distribution as number[];
+    if (!Array.isArray(hourly)) continue;
+    for (let hour = 0; hour < hourly.length && hour < 24; hour++) {
+      const key = `${dayOfWeek}:${hour}`;
+      buckets.set(key, (buckets.get(key) ?? 0) + (hourly[hour] ?? 0));
+    }
+  }
+  const heatmapData: HourlyHeatmapEntry[] = [];
+  for (let dow = 0; dow < 7; dow++) {
+    for (let hour = 0; hour < 24; hour++) {
+      heatmapData.push({
+        day_of_week: dow,
+        hour,
+        count: buckets.get(`${dow}:${hour}`) ?? 0,
+      });
+    }
+  }
+
+  // Aggregate stop reasons across all days
+  const reasonTotals = new Map<string, number>();
+  for (const row of rows) {
+    const sr = row.stop_reasons as Record<string, number> | null;
+    if (!sr) continue;
+    for (const [reason, count] of Object.entries(sr)) {
+      reasonTotals.set(reason, (reasonTotals.get(reason) ?? 0) + count);
+    }
+  }
+  const stopReasons = Array.from(reasonTotals.entries())
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count);
 
   return (
     <div className="flex flex-col gap-6 p-6">

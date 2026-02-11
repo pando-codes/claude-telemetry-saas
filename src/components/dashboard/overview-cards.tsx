@@ -4,6 +4,7 @@ import {
   Terminal,
   Zap,
   Wrench,
+  Bot,
   CalendarDays,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +66,11 @@ export function OverviewCards({ stats }: OverviewCardsProps) {
         label="Tool Uses"
         value={stats.total_tool_uses}
         icon={<Wrench className="size-4" />}
+      />
+      <StatCard
+        label="Agent Calls"
+        value={stats.total_agent_calls}
+        icon={<Bot className="size-4" />}
       />
       <StatCard
         label="Active Days"

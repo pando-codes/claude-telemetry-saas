@@ -28,8 +28,16 @@ export default async function ToolsPage() {
     redirect("/login");
   }
 
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const p_from = thirtyDaysAgo.toISOString().substring(0, 10);
+  const p_to = now.toISOString().substring(0, 10);
+
   const { data } = await supabase.rpc("get_top_tools", {
     p_user_id: user.id,
+    p_from,
+    p_to,
     p_limit: 50,
   });
 

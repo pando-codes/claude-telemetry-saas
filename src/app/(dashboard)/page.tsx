@@ -39,6 +39,7 @@ export default async function OverviewPage() {
     total_sessions: 0,
     total_events: 0,
     total_tool_uses: 0,
+    total_agent_calls: 0,
     active_days: 0,
     avg_session_duration_min: 0,
     avg_tools_per_session: 0,
