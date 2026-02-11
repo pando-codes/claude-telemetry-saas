@@ -41,7 +41,14 @@ export default async function ToolsPage() {
     p_limit: 50,
   });
 
-  const tools: ToolUsageStat[] = data ?? [];
+  const tools: ToolUsageStat[] = ((data as Record<string, unknown>[]) ?? []).map((row) => ({
+    tool_name: row.tool_name as string,
+    count: row.count as number,
+    avg_duration_ms: (row.avg_duration_ms as number) ?? null,
+    p50_duration_ms: (row.p50_duration_ms as number) ?? null,
+    p99_duration_ms: (row.p99_duration_ms as number) ?? null,
+    trend: (row.trend as number) ?? 0,
+  }));
 
   return (
     <div className="flex flex-col gap-6 p-6">
